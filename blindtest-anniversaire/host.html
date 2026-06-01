@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blind Test Gaming — Animateur</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --neon: #CCFF00;
+      --bg: #111;
+      --card: #161616;
+      --border: #2a2a2a;
+      --radius: 12px;
+    }
+
+    body {
+      background: #0e0e0e;
+      color: #fff;
+      font-family: 'Impact', 'Arial Black', Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── TOP BAR ───────────────────────────── */
+    #topbar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 20px;
+      background: #0a0a0a;
+      border-bottom: 1px solid #222;
+      flex-shrink: 0;
+    }
+
+    .tb-title {
+      font-size: 1.3rem;
+      text-transform: uppercase;
+      color: var(--neon);
+      text-shadow: 0 0 12px var(--neon);
+      letter-spacing: 4px;
+      flex: 1;
+    }
+
+    .tb-badge {
+      font-family: Arial, sans-serif;
+      font-size: 0.75rem;
+      color: #666;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 20px;
+      padding: 4px 12px;
+      letter-spacing: 1px;
+    }
+
+    .tb-badge strong { color: var(--neon); }
+
+    #btnResetGame {
+      font-family: Arial, sans-serif;
+      font-size: 0.7rem;
+      color: #555;
+      background: transparent;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 1px;
+    }
+    #btnResetGame:hover { border-color: #ff4444; color: #ff4444; }
+
+    /* ── MAIN LAYOUT ───────────────────────── */
+    #main {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 0;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── LEFT PANEL ────────────────────────── */
+    #left {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 14px 16px;
+      overflow-y: auto;
+    }
+
+    /* ── RIGHT PANEL ───────────────────────── */
+    #right {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 14px 14px;
+      border-left: 1px solid #1e1e1e;
+      overflow-y: auto;
+      background: #0d0d0d;
+    }
+
+    /* ── CONTROL BAR ───────────────────────── */
+    #ctrlbar {
+      display: flex;
+      gap: 10px;
+      padding: 12px 20px;
+      background: #0a0a0a;
+      border-top: 1px solid #222;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    /* ── SCREENS ───────────────────────────── */
+    .host-screen { display: none; }
+    .host-screen.active { display: contents; }
+
+    /* ── CARDS / SECTIONS ──────────────────── */
+    .section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+
+    .section-title {
+      font-family: Arial, sans-serif;
+      font-size: 0.65rem;
+      color: #555;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    /* ── THEME BADGE ───────────────────────── */
+    .theme-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .q-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .q-number-big {
+      font-family: Arial, sans-serif;
+      font-size: 0.85rem;
+      color: #666;
+      letter-spacing: 1px;
+    }
+
+    /* ── QUESTION TEXT ─────────────────────── */
+    .q-text-host {
+      font-size: clamp(1rem, 2vw, 1.4rem);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      line-height: 1.3;
+      color: #eee;
+    }
+
+    /* ── POKEMON CARD ──────────────────────── */
+    .pokemon-host-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .pokemon-host-wrap img {
+      height: 160px;
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(255,204,0,0.25);
+      object-fit: contain;
+    }
+
+    .card-info { font-family: Arial, sans-serif; font-size: 0.8rem; color: #888; }
+
+    /* ── YOUTUBE PLAYER ────────────────────── */
+    .yt-section {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    #yt-player { border-radius: 8px; overflow: hidden; flex-shrink: 0; }
+    #yt-player iframe { display: block; }
+
+    .yt-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .yt-id-note {
+      font-family: Arial, sans-serif;
+      font-size: 0.7rem;
+      color: #555;
+      word-break: break-all;
+    }
+
+    .yt-id-note a { color: #CCFF00; text-decoration: none; }
+    .yt-id-note a:hover { text-decoration: underline; }
+
+    /* ── ANSWER CHOICES ────────────────────── */
+    .choices-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .choice-box {
+      border: 2px solid #2e2e2e;
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .choice-box .c-label {
+      font-size: 0.65rem;
+      font-family: Arial, sans-serif;
+      color: #555;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .choice-box .c-text {
+      font-size: clamp(0.85rem, 1.5vw, 1rem);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #ccc;
+      line-height: 1.2;
+    }
+
+    .choice-box .c-count {
+      font-family: Arial, sans-serif;
+      font-size: 0.75rem;
+      color: #555;
+    }
+
+    .choice-box .c-bar {
+      height: 3px;
+      background: #2a2a2a;
+      border-radius: 2px;
+      margin-top: 4px;
+      overflow: hidden;
+    }
+
+    .choice-box .c-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: #444;
+      transition: width 0.4s ease;
+    }
+
+    .choice-box.is-correct {
+      border-color: var(--neon) !important;
+      background: rgba(204,255,0,0.06) !important;
+    }
+
+    .choice-box.is-correct .c-text { color: var(--neon); }
+    .choice-box.is-correct .c-bar-fill { background: var(--neon); }
+    .choice-box.is-correct::after {
+      content: '✓';
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      color: var(--neon);
+      font-size: 0.9rem;
+      text-shadow: 0 0 8px var(--neon);
+    }
+
+    .choice-box.host-preview {
+      border-color: rgba(204,255,0,0.3);
+    }
+    .choice-box.host-preview .c-text { color: rgba(204,255,0,0.7); }
+    .choice-box.host-preview::after {
+      content: '✓';
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      color: rgba(204,255,0,0.4);
+      font-size: 0.9rem;
+    }
+
+    /* ── TIMER ─────────────────────────────── */
+    .timer-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .timer-svg-host {
+      width: 90px;
+      height: 90px;
+      filter: drop-shadow(0 0 8px rgba(204,255,0,0.4));
+      flex-shrink: 0;
+    }
+
+    #host-timer-ring { transition: stroke-dashoffset 0.15s linear, stroke 0.4s; }
+
+    .timer-info { flex: 1; }
+
+    .answers-live-count {
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      color: var(--neon);
+      text-shadow: 0 0 12px var(--neon);
+    }
+
+    .answers-live-label {
+      font-family: Arial, sans-serif;
+      font-size: 0.75rem;
+      color: #666;
+      letter-spacing: 1px;
+      margin-top: 2px;
+    }
+
+    /* ── CONTROL BUTTONS ───────────────────── */
+    .ctrl-btn {
+      flex: 1;
+      min-width: 130px;
+      background: #1a1a1a;
+      border: 2px solid #333;
+      border-radius: 10px;
+      color: #888;
+      font-size: 0.85rem;
+      font-family: 'Impact', 'Arial Black', Arial, sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      padding: 14px 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .ctrl-btn:hover:not(:disabled) { transform: translateY(-2px); }
+    .ctrl-btn:active:not(:disabled) { transform: scale(0.97); }
+    .ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .ctrl-btn.primary {
+      background: var(--neon);
+      border-color: var(--neon);
+      color: #111;
+      box-shadow: 0 0 24px rgba(204,255,0,0.4);
+    }
+
+    .ctrl-btn.primary:hover:not(:disabled) {
+      box-shadow: 0 0 40px rgba(204,255,0,0.7);
+    }
+
+    .ctrl-btn.danger {
+      border-color: #ff4444;
+      color: #ff7777;
+    }
+
+    .ctrl-btn.danger:hover:not(:disabled) {
+      background: rgba(255,68,68,0.12);
+      box-shadow: 0 0 16px rgba(255,68,68,0.3);
+    }
+
+    /* ── QR CODE ───────────────────────────── */
+    .qr-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #qrcode canvas, #qrcode img {
+      border-radius: 8px;
+      border: 3px solid var(--neon);
+      box-shadow: 0 0 20px rgba(204,255,0,0.3);
+    }
+
+    .qr-url {
+      font-family: Arial, sans-serif;
+      font-size: 0.7rem;
+      color: #777;
+      text-align: center;
+      word-break: break-all;
+    }
+
+    /* ── PLAYER LIST ───────────────────────── */
+    #playerList {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .player-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1a1a1a;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .player-score-badge {
+      font-family: Arial, sans-serif;
+      font-size: 0.75rem;
+      color: var(--neon);
+    }
+
+    /* ── SCOREBOARD ────────────────────────── */
+    #sb-host-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 420px;
+      overflow-y: auto;
+    }
+
+    .sb-entry-host {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #1a1a1a;
+      border: 1px solid #252525;
+      border-radius: 8px;
+      padding: 10px 14px;
+    }
+
+    .sb-rank-h { min-width: 26px; font-size: 1.1rem; color: #555; text-align: center; }
+    .sb-entry-host.r1 .sb-rank-h { color: #FFD700; }
+    .sb-entry-host.r2 .sb-rank-h { color: #C0C0C0; }
+    .sb-entry-host.r3 .sb-rank-h { color: #CD7F32; }
+
+    .sb-name-h { flex:1; font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase; color: #ccc; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .sb-score-h { font-family: Arial, sans-serif; font-size: 0.85rem; color: #888; }
+
+    .sb-host-title {
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+      text-transform: uppercase;
+      color: var(--neon);
+      text-shadow: 0 0 16px var(--neon);
+      letter-spacing: 4px;
+      text-align: center;
+    }
+
+    /* ── LOBBY SCREEN ──────────────────────── */
+    #lobby-msg {
+      text-align: center;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 40px 20px;
+    }
+
+    #lobby-msg .big-icon { font-size: 3rem; filter: drop-shadow(0 0 16px var(--neon)); }
+
+    #lobby-msg .lob-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      text-transform: uppercase;
+      color: var(--neon);
+      text-shadow: 0 0 20px var(--neon);
+      letter-spacing: 5px;
+    }
+
+    #lobby-msg .lob-sub {
+      font-family: Arial, sans-serif;
+      font-size: 0.85rem;
+      color: #666;
+      letter-spacing: 2px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+    /* ── STATUS DOT ────────────────────────── */
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #444;
+      display: inline-block;
+      margin-right: 4px;
+    }
+
+    .status-dot.live { background: var(--neon); box-shadow: 0 0 6px var(--neon); animation: blink 1.2s ease-in-out infinite; }
+
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  </style>
+</head>
+<body>
+
+<!-- ═══ TOP BAR ═══ -->
+<div id="topbar">
+  <div class="tb-title">🎮 BLIND TEST — ANIMATEUR</div>
+  <div class="tb-badge">Q : <strong id="tb-q">—</strong></div>
+  <div class="tb-badge">Joueurs : <strong id="tb-players">0</strong></div>
+  <div class="tb-badge" id="tb-status">⬤ Lobby</div>
+  <button id="btnResetGame" onclick="if(confirm('Remettre le jeu à zéro ?')) resetGame()">↺ Reset</button>
+</div>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<div id="main">
+
+  <!-- LEFT PANEL -->
+  <div id="left" class="scrollbar-thin">
+
+    <!-- LOBBY -->
+    <div id="lobby-msg" class="host-screen" style="display:flex">
+      <div class="big-icon">🎮</div>
+      <div class="lob-title">BLIND TEST GAMING</div>
+      <div class="lob-sub">En attente des joueurs...</div>
+      <div id="lobby-player-count" style="font-family:Arial;font-size:0.9rem;color:#888">0 joueur connecté</div>
+    </div>
+
+    <!-- QUESTION CONTENT (question + reveal state) -->
+    <div id="q-content" class="host-screen">
+      <!-- Theme + Q number -->
+      <div class="section">
+        <div class="q-header-row">
+          <div class="theme-badge" id="h-theme-badge">POKÉMON</div>
+          <div class="q-number-big" id="h-q-number">Q1 / 27</div>
+        </div>
+      </div>
+
+      <!-- Question text -->
+      <div class="section">
+        <div class="section-title">Question</div>
+        <div class="q-text-host" id="h-q-text">—</div>
+      </div>
+
+      <!-- Pokemon card -->
+      <div class="section" id="h-pokemon-section" style="display:none">
+        <div class="section-title">Carte Pokémon</div>
+        <div class="pokemon-host-wrap">
+          <img id="h-pokemon-img" src="" alt="Carte" onerror="this.style.opacity=0.2">
+          <div class="card-info" id="h-pokemon-name"></div>
+        </div>
+      </div>
+
+      <!-- YouTube section -->
+      <div class="section" id="h-youtube-section" style="display:none">
+        <div class="section-title">Audio YouTube</div>
+        <div class="yt-section">
+          <div id="yt-player"></div>
+          <div class="yt-controls">
+            <button class="ctrl-btn primary" onclick="ytPlay()" style="min-width:0;flex:none;padding:10px 18px">▶ Lecture</button>
+            <button class="ctrl-btn" onclick="ytPause()" style="min-width:0;flex:none;padding:10px 18px">⏸ Pause</button>
+            <div class="yt-id-note" id="h-yt-note">ID : —</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Answer choices -->
+      <div class="section">
+        <div class="section-title">Réponses <span id="correct-preview-note" style="color:rgba(204,255,0,0.5);font-size:0.6rem">(✓ = bonne réponse, visible seulement ici)</span></div>
+        <div class="choices-grid" id="h-choices"></div>
+      </div>
+
+      <!-- Timer + answer count -->
+      <div class="section">
+        <div class="timer-row">
+          <svg viewBox="0 0 100 100" class="timer-svg-host">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="#252525" stroke-width="8"/>
+            <circle cx="50" cy="50" r="42" fill="none" stroke="#CCFF00" stroke-width="8"
+              stroke-dasharray="263.9" stroke-dashoffset="0"
+              stroke-linecap="round" transform="rotate(-90 50 50)"
+              id="host-timer-ring"/>
+            <text x="50" y="56" text-anchor="middle" font-size="24" font-weight="bold"
+              fill="#CCFF00" font-family="Impact, Arial Black, sans-serif"
+              id="host-timer-text">30</text>
+          </svg>
+          <div class="timer-info">
+            <div class="answers-live-count" id="h-answer-count">0 / 0</div>
+            <div class="answers-live-label">ont répondu</div>
+            <div style="margin-top:8px;background:#1a1a1a;border-radius:4px;height:5px;overflow:hidden">
+              <div id="h-progress-bar" style="height:100%;background:var(--neon);width:0%;transition:width 0.3s;border-radius:4px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCOREBOARD on left -->
+    <div id="sb-left" class="host-screen">
+      <div class="section">
+        <div class="sb-host-title" id="sb-host-title">CLASSEMENT</div>
+        <div style="font-family:Arial;font-size:0.75rem;color:#666;text-align:center;margin:6px 0" id="sb-host-sub"></div>
+        <div id="sb-host-list" class="scrollbar-thin" style="margin-top:12px"></div>
+      </div>
+    </div>
+
+  </div><!-- /left -->
+
+  <!-- RIGHT PANEL -->
+  <div id="right" class="scrollbar-thin">
+
+    <!-- QR CODE -->
+    <div class="section">
+      <div class="section-title">QR Code — Joueurs</div>
+      <div class="qr-wrap">
+        <div id="qrcode"></div>
+        <div class="qr-url" id="qr-url-display">—</div>
+      </div>
+    </div>
+
+    <!-- PLAYER LIST -->
+    <div class="section">
+      <div class="section-title"><span class="status-dot live"></span>Joueurs connectés</div>
+      <div id="playerList" class="scrollbar-thin"></div>
+    </div>
+
+    <!-- ANSWER DISTRIBUTION (shown after reveal) -->
+    <div class="section" id="h-distrib-section" style="display:none">
+      <div class="section-title">Distribution des réponses</div>
+      <div id="h-distrib-detail"
+        style="font-family:Arial;font-size:0.8rem;color:#888;line-height:1.8"></div>
+    </div>
+
+  </div><!-- /right -->
+
+</div><!-- /main -->
+
+<!-- ═══ CONTROL BAR ═══ -->
+<div id="ctrlbar">
+  <!-- LOBBY STATE -->
+  <button class="ctrl-btn primary" id="btn-start"
+    onclick="startGame()" style="display:none">
+    🚀 Démarrer le jeu
+  </button>
+
+  <!-- QUESTION STATE -->
+  <button class="ctrl-btn" id="btn-replay"
+    onclick="replayQuestion()" style="display:none" disabled>
+    ↺ Rejouer
+  </button>
+
+  <button class="ctrl-btn danger" id="btn-reveal"
+    onclick="revealAnswer()" style="display:none" disabled>
+    👁 Révéler la réponse
+  </button>
+
+  <!-- REVEAL STATE -->
+  <button class="ctrl-btn primary" id="btn-next"
+    onclick="goToNext()" style="display:none" disabled>
+    → Question suivante
+  </button>
+
+  <!-- SCOREBOARD STATE -->
+  <button class="ctrl-btn primary" id="btn-continue"
+    onclick="continueAfterScoreboard()" style="display:none">
+    ▶ Continuer
+  </button>
+</div>
+
+<!-- ═══ SCRIPTS ═══ -->
+<!-- YouTube IFrame API (chargé de façon asynchrone) -->
+<script>
+  var tag = document.createElement('script');
+  tag.src = "https://www.youtube.com/iframe_api";
+  var firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+</script>
+
+<!-- QRCode.js -->
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+<!-- Firebase Compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// ⚙️  CONFIGURATION — À PERSONNALISER AVANT LE JEU
+// ═══════════════════════════════════════════════════════════
+const GITHUB_PAGES_URL = 'https://noelbenj53bis-boop.github.io/blindtest-anniversaire/';
+// Exemple : 'https://johndoe.github.io/blindtest-anniversaire/'
+
+// ═══════════════════════════════════════════════════════════
+// QUESTIONS — 27 au total
+// Pour les questions YouTube : remplacez les valeurs youtubeId
+// Trouvez l'ID dans l'URL YouTube : youtube.com/watch?v=CECI_EST_L_ID
+// Les correctIndex et choices doivent correspondre dans player.html
+// ═══════════════════════════════════════════════════════════
+const QUESTIONS = [
+  // ── POKÉMON ─ 6 questions ─ 45s ──
+  { id:0, theme:'POKÉMON', themeIcon:'🃏', themeColor:'#FFCC00', themeText:'#111',
+    type:'pokemon', question:'Combien vaut cette carte en moyenne sur le marché ?',
+    cardImageUrl:'https://images.pokemontcg.io/base1/4_hires.png',
+    cardDisplayName:'Dracaufeu Holo Rare — Set de Base',
+    choices:['50–100€','150–250€','350–500€','1 000–2 000€'], correctIndex:2, timer:45 },
+
+  { id:1, theme:'POKÉMON', themeIcon:'🃏', themeColor:'#FFCC00', themeText:'#111',
+    type:'pokemon', question:'Combien vaut cette carte en moyenne sur le marché ?',
+    cardImageUrl:'https://images.pokemontcg.io/swsh12pt5/215_hires.png',
+    cardDisplayName:'Noctali VMAX — Zénith Suprême (Alt Art)',
+    choices:['30–60€','80–150€','200–300€','500–800€'], correctIndex:2, timer:45 },
+
+  { id:2, theme:'POKÉMON', themeIcon:'🃏', themeColor:'#FFCC00', themeText:'#111',
+    type:'pokemon', question:'Combien vaut cette carte en moyenne sur le marché ?',
+    cardImageUrl:'https://images.pokemontcg.io/swsh7/218_hires.png',
+    cardDisplayName:'Rayquaza VMAX — Ciel Rugissant (Alt Art)',
+    choices:['30–60€','100–180€','250–350€','500–700€'], correctIndex:1, timer:45 },
+
+  { id:3, theme:'POKÉMON', themeIcon:'🃏', themeColor:'#FFCC00', themeText:'#111',
+    type:'pokemon', question:'Combien vaut cette carte en moyenne sur le marché ?',
+    cardImageUrl:'https://images.pokemontcg.io/swsh12/186_hires.png',
+    cardDisplayName:'Lugia V — Tempête Argentée (Alt Art)',
+    choices:['10–25€','40–80€','100–180€','300–500€'], correctIndex:2, timer:45 },
+
+  { id:4, theme:'POKÉMON', themeIcon:'🃏', themeColor:'#FFCC00', themeText:'#111',
+    type:'pokemon', question:'Combien vaut cette carte en moyenne sur le marché ?',
+    cardImageUrl:'https://images.pokemontcg.io/base1/2_hires.png',
+    cardDisplayName:'Tortank Holo Rare — Set de Base',
+    choices:['20–40€','70–130€','200–300€','500–700€'], correctIndex:1, timer:45 },
+
+  { id:5, theme:'POKÉMON', themeIcon:'🃏', themeColor:'#FFCC00', themeText:'#111',
+    type:'pokemon', question:'Combien vaut cette carte en moyenne sur le marché ?',
+    cardImageUrl:'https://images.pokemontcg.io/sv3pt5/207_hires.png',
+    cardDisplayName:'Dracaufeu ex — Pokémon 151 (Alt Art)',
+    choices:['10–25€','40–80€','150–250€','400–600€'], correctIndex:1, timer:45 },
+
+  // ── VALORANT ─ 3 questions ─ 30s ──
+  { id:6, theme:'VALORANT', themeIcon:'⚔️', themeColor:'#FF4655', themeText:'#fff',
+    type:'youtube', question:'Quel agent VALORANT est associé à ce thème musical ?',
+    youtubeId:'srnoYIvSws0',
+    choices:['Jett','Phoenix','Reyna','Neon'], correctIndex:1, timer:30 },
+
+  { id:7, theme:'VALORANT', themeIcon:'⚔️', themeColor:'#FF4655', themeText:'#fff',
+    type:'youtube', question:'Quel agent VALORANT possède ce trailer musical ?',
+    youtubeId:'REMPLACER_VAL2',
+    choices:['Chamber','Killjoy','Sage','Cypher'], correctIndex:1, timer:30 },
+
+  { id:8, theme:'VALORANT', themeIcon:'⚔️', themeColor:'#FF4655', themeText:'#fff',
+    type:'youtube', question:'De quelle map VALORANT provient ce thème d\'ambiance ?',
+    youtubeId:'REMPLACER_VAL3',
+    choices:['Ascent','Haven','Bind','Pearl'], correctIndex:0, timer:30 },
+
+  // ── APEX LEGENDS ─ 3 questions ─ 30s ──
+  { id:9, theme:'APEX LEGENDS', themeIcon:'🎯', themeColor:'#CF0A0A', themeText:'#fff',
+    type:'youtube', question:'Quel est le thème de cette légende Apex ?',
+    youtubeId:'REMPLACER_APEX1',
+    choices:['Wraith','Pathfinder','Octane','Bloodhound'], correctIndex:0, timer:30 },
+
+  { id:10, theme:'APEX LEGENDS', themeIcon:'🎯', themeColor:'#CF0A0A', themeText:'#fff',
+    type:'youtube', question:'De quelle saison d\'Apex Legends vient ce thème ?',
+    youtubeId:'REMPLACER_APEX2',
+    choices:['Saison 1','Saison 5','Saison 10','Saison 15'], correctIndex:2, timer:30 },
+
+  { id:11, theme:'APEX LEGENDS', themeIcon:'🎯', themeColor:'#CF0A0A', themeText:'#fff',
+    type:'youtube', question:'Quel est le thème de cette légende Apex ?',
+    youtubeId:'REMPLACER_APEX3',
+    choices:['Loba','Valkyrie','Horizon','Newcastle'], correctIndex:2, timer:30 },
+
+  // ── LEAGUE OF LEGENDS ─ 3 questions ─ 30s ──
+  { id:12, theme:'LEAGUE OF LEGENDS', themeIcon:'⚡', themeColor:'#0BBCD4', themeText:'#fff',
+    type:'youtube', question:'Quel champion League of Legends possède ce thème ?',
+    youtubeId:'REMPLACER_LOL1',
+    choices:['Jinx','Ahri','Yasuo','Vi'], correctIndex:0, timer:30 },
+
+  { id:13, theme:'LEAGUE OF LEGENDS', themeIcon:'⚡', themeColor:'#0BBCD4', themeText:'#fff',
+    type:'youtube', question:'Quel est ce titre musical des Worlds ?',
+    youtubeId:'REMPLACER_LOL2',
+    choices:['Warriors (2014)','Rise (2018)','Phoenix (2019)','GODS (2023)'], correctIndex:0, timer:30 },
+
+  { id:14, theme:'LEAGUE OF LEGENDS', themeIcon:'⚡', themeColor:'#0BBCD4', themeText:'#fff',
+    type:'youtube', question:'Quel champion League of Legends possède ce thème ?',
+    youtubeId:'REMPLACER_LOL3',
+    choices:['Lux','Ekko','Akali','Senna'], correctIndex:2, timer:30 },
+
+  // ── BRAWLHALLA ─ 3 questions ─ 30s ──
+  { id:15, theme:'BRAWLHALLA', themeIcon:'🪓', themeColor:'#3B82F6', themeText:'#fff',
+    type:'youtube', question:'Quel est le thème de cette légende Brawlhalla ?',
+    youtubeId:'REMPLACER_BH1',
+    choices:['Bodvar','Mordex','Val','Koji'], correctIndex:0, timer:30 },
+
+  { id:16, theme:'BRAWLHALLA', themeIcon:'🪓', themeColor:'#3B82F6', themeText:'#fff',
+    type:'youtube', question:'Quel est le thème de cette légende Brawlhalla ?',
+    youtubeId:'REMPLACER_BH2',
+    choices:['Rayman','Cassidy','Isaiah','Artemis'], correctIndex:0, timer:30 },
+
+  { id:17, theme:'BRAWLHALLA', themeIcon:'🪓', themeColor:'#3B82F6', themeText:'#fff',
+    type:'youtube', question:'De quel mode de jeu Brawlhalla vient cette musique ?',
+    youtubeId:'REMPLACER_BH3',
+    choices:['Brawlball','Kung Foot','Bombsketball','Horde'], correctIndex:1, timer:30 },
+
+  // ── CLASH OF CLANS ─ 3 questions ─ 30s ──
+  { id:18, theme:'CLASH OF CLANS', themeIcon:'🏰', themeColor:'#F59E0B', themeText:'#111',
+    type:'youtube', question:'Quel est ce thème musical de Clash of Clans ?',
+    youtubeId:'REMPLACER_COC1',
+    choices:['Thème principal','Village du Constructeur','Capital de Clan','Mode Guerre'], correctIndex:0, timer:30 },
+
+  { id:19, theme:'CLASH OF CLANS', themeIcon:'🏰', themeColor:'#F59E0B', themeText:'#111',
+    type:'youtube', question:'Quel Héros CoC est associé à ce thème ?',
+    youtubeId:'REMPLACER_COC2',
+    choices:['Roi Barbare','Reine Archer','Grand Gardien','Maître des Forges'], correctIndex:1, timer:30 },
+
+  { id:20, theme:'CLASH OF CLANS', themeIcon:'🏰', themeColor:'#F59E0B', themeText:'#111',
+    type:'youtube', question:'De quel village CoC provient cette musique d\'ambiance ?',
+    youtubeId:'REMPLACER_COC3',
+    choices:['Village Principal','Village Constructeur','Capital de Clan','Village de Nuit'], correctIndex:1, timer:30 },
+
+  // ── CLASH ROYALE ─ 3 questions ─ 30s ──
+  { id:21, theme:'CLASH ROYALE', themeIcon:'👑', themeColor:'#7C3AED', themeText:'#fff',
+    type:'youtube', question:'Quel est ce thème musical de Clash Royale ?',
+    youtubeId:'REMPLACER_CR1',
+    choices:['Menu principal','Arène Légendaire','Village d\'Entraînement','Tournoi'], correctIndex:0, timer:30 },
+
+  { id:22, theme:'CLASH ROYALE', themeIcon:'👑', themeColor:'#7C3AED', themeText:'#fff',
+    type:'youtube', question:'De quelle arène Clash Royale provient cette musique ?',
+    youtubeId:'REMPLACER_CR2',
+    choices:['Arène 1 — Gobelins','Arène 5 — Jungle','Arène 10 — Forteresse','Arène Légendaire'], correctIndex:3, timer:30 },
+
+  { id:23, theme:'CLASH ROYALE', themeIcon:'👑', themeColor:'#7C3AED', themeText:'#fff',
+    type:'youtube', question:'Quel mode de jeu Clash Royale correspond à ce thème ?',
+    youtubeId:'REMPLACER_CR3',
+    choices:['2v2','Mode Draft','Défi Classique','Global Tournament'], correctIndex:0, timer:30 },
+
+  // ── BRAWL STARS ─ 3 questions ─ 30s ──
+  { id:24, theme:'BRAWL STARS', themeIcon:'⭐', themeColor:'#EC4899', themeText:'#fff',
+    type:'youtube', question:'Quel Brawler possède ce thème musical ?',
+    youtubeId:'REMPLACER_BS1',
+    choices:['El Primo','Shelly','Spike','Crow'], correctIndex:2, timer:30 },
+
+  { id:25, theme:'BRAWL STARS', themeIcon:'⭐', themeColor:'#EC4899', themeText:'#fff',
+    type:'youtube', question:'Quel mode de jeu Brawl Stars correspond à cette musique ?',
+    youtubeId:'REMPLACER_BS2',
+    choices:['Gem Grab','Brawl Ball','Showdown','Bounty'], correctIndex:1, timer:30 },
+
+  { id:26, theme:'BRAWL STARS', themeIcon:'⭐', themeColor:'#EC4899', themeText:'#fff',
+    type:'youtube', question:'Quel est le thème de ce Brawler légendaire ?',
+    youtubeId:'REMPLACER_BS3',
+    choices:['Leon','Sandy','Amber','Surge'], correctIndex:0, timer:30 }
+];
+
+// ═══════════════════════════════════════════════════════════
+// FIREBASE
+// ═══════════════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyBDjMGInt3PNL7SNlfFG_-cjahJW66_i1A",
+  authDomain: "blindtest-anniversaire.firebaseapp.com",
+  databaseURL: "https://blindtest-anniversaire-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "blindtest-anniversaire",
+  storageBucket: "blindtest-anniversaire.firebasestorage.app",
+  messagingSenderId: "164642303775",
+  appId: "1:164642303775:web:ba51b309d28675fb8f8a2a"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ═══════════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════════
+const CIRC = 263.9; // 2 * PI * 42
+const SCOREBOARD_AFTER = new Set([8, 17, 26]); // indices après lesquels = tableau des scores
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let currentQIndex = -1;
+let currentTimerEnd = 0;
+let currentTimerDuration = 30;
+let currentScoreboardCheckpoint = 0;
+let hostTimerInterval = null;
+let ytPlayer = null;
+let ytReady = false;
+let answersListener = null;
+let totalPlayers = 0;
+
+// ═══════════════════════════════════════════════════════════
+// YOUTUBE API
+// ═══════════════════════════════════════════════════════════
+function onYouTubeIframeAPIReady() {
+  ytPlayer = new YT.Player('yt-player', {
+    width: '280',
+    height: '158',
+    playerVars: { autoplay: 0, controls: 1, rel: 0, modestbranding: 1 },
+    events: {
+      onReady: () => { ytReady = true; }
+    }
+  });
+}
+
+function ytPlay()   { if (ytReady && ytPlayer) ytPlayer.playVideo(); }
+function ytPause()  { if (ytReady && ytPlayer) ytPlayer.pauseVideo(); }
+
+function ytLoadAndPlay(videoId) {
+  if (!ytReady || !ytPlayer) return;
+  if (!videoId || videoId.startsWith('REMPLACER')) {
+    document.getElementById('h-yt-note').innerHTML =
+      '⚠️ ID YouTube non configuré : <strong>' + videoId + '</strong><br>' +
+      'Remplacez-le dans QUESTIONS[' + currentQIndex + '].youtubeId';
+    return;
+  }
+  ytPlayer.loadVideoById({ videoId, startSeconds: 0 });
+  document.getElementById('h-yt-note').innerHTML =
+    'ID : <a href="https://youtube.com/watch?v=' + videoId + '" target="_blank">' + videoId + '</a>';
+}
+
+function ytStop() { if (ytReady && ytPlayer) ytPlayer.stopVideo(); }
+
+// ═══════════════════════════════════════════════════════════
+// QR CODE INIT
+// ═══════════════════════════════════════════════════════════
+function initQRCode() {
+  const url = GITHUB_PAGES_URL;
+  try {
+    new QRCode(document.getElementById('qrcode'), {
+      text: url,
+      width: 170,
+      height: 170,
+      colorDark: '#CCFF00',
+      colorLight: '#161616',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  } catch(e) { document.getElementById('qrcode').textContent = url; }
+  document.getElementById('qr-url-display').textContent = url;
+}
+
+// ═══════════════════════════════════════════════════════════
+// HOST SCREENS
+// ═══════════════════════════════════════════════════════════
+function showHostScreen(name) {
+  document.querySelectorAll('.host-screen').forEach(s => s.style.display = 'none');
+  const el = document.getElementById(name);
+  if (el) el.style.display = name === 'lobby-msg' ? 'flex' : 'block';
+}
+
+// ═══════════════════════════════════════════════════════════
+// TIMER
+// ═══════════════════════════════════════════════════════════
+function startHostTimer(duration) {
+  stopHostTimer();
+  hostTimerInterval = setInterval(() => {
+    const left = Math.max(0, (currentTimerEnd - Date.now()) / 1000);
+    updateTimerRing(left, duration);
+    if (left <= 0) stopHostTimer();
+  }, 100);
+}
+
+function stopHostTimer() {
+  if (hostTimerInterval) { clearInterval(hostTimerInterval); hostTimerInterval = null; }
+}
+
+function updateTimerRing(left, total) {
+  const frac = Math.max(0, Math.min(1, left / total));
+  const offset = (1 - frac) * CIRC;
+  const ring = document.getElementById('host-timer-ring');
+  const txt  = document.getElementById('host-timer-text');
+  if (!ring) return;
+  ring.style.strokeDashoffset = offset;
+  txt.textContent = Math.ceil(left);
+  const color = frac > 0.5 ? '#CCFF00' : frac > 0.25 ? '#FFD700' : '#FF4444';
+  ring.style.stroke = color;
+  txt.style.fill = color;
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER QUESTION ON HOST
+// ═══════════════════════════════════════════════════════════
+function renderHostQuestion(q, revealed) {
+  // Theme badge
+  const badge = document.getElementById('h-theme-badge');
+  badge.textContent = q.themeIcon + ' ' + q.theme;
+  badge.style.background = q.themeColor;
+  badge.style.color = q.themeText;
+  badge.style.boxShadow = '0 0 12px ' + q.themeColor + '60';
+
+  document.getElementById('h-q-number').textContent = 'Q' + (q.id + 1) + ' / 27';
+  document.getElementById('h-q-text').textContent = q.question;
+
+  // Media
+  if (q.type === 'pokemon') {
+    document.getElementById('h-pokemon-section').style.display = 'block';
+    document.getElementById('h-youtube-section').style.display = 'none';
+    document.getElementById('h-pokemon-img').src = q.cardImageUrl;
+    document.getElementById('h-pokemon-name').textContent = q.cardDisplayName;
+  } else {
+    document.getElementById('h-pokemon-section').style.display = 'none';
+    document.getElementById('h-youtube-section').style.display = 'block';
+    if (!revealed) ytLoadAndPlay(q.youtubeId);
+  }
+
+  // Choices
+  renderChoices(q, revealed);
+
+  // Update top bar
+  document.getElementById('tb-q').textContent = (q.id + 1) + ' / 27';
+
+  showHostScreen('q-content');
+}
+
+function renderChoices(q, revealed) {
+  const grid = document.getElementById('h-choices');
+  grid.innerHTML = '';
+  q.choices.forEach((choice, i) => {
+    const div = document.createElement('div');
+    div.className = 'choice-box';
+    if (revealed && i === q.correctIndex) {
+      div.classList.add('is-correct');
+    } else if (!revealed && i === q.correctIndex) {
+      div.classList.add('host-preview');
+    }
+    div.innerHTML =
+      '<div class="c-label">' + String.fromCharCode(65+i) + '</div>' +
+      '<div class="c-text">' + escHtml(choice) + '</div>' +
+      '<div class="c-count" id="cnt-' + i + '">— réponses</div>' +
+      '<div class="c-bar"><div class="c-bar-fill" id="bar-' + i + '" style="width:0%"></div></div>';
+    grid.appendChild(div);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// ANSWER COUNT LISTENER
+// ═══════════════════════════════════════════════════════════
+function listenToAnswers(qi) {
+  if (answersListener) { db.ref('answers/' + (qi-1)).off(); answersListener = null; }
+  answersListener = db.ref('answers/' + qi).on('value', snap => {
+    const answers = snap.val() || {};
+    const count = Object.keys(answers).length;
+    document.getElementById('h-answer-count').textContent = count + ' / ' + totalPlayers;
+    const pct = totalPlayers > 0 ? Math.round((count / totalPlayers) * 100) : 0;
+    document.getElementById('h-progress-bar').style.width = pct + '%';
+
+    // Count per choice
+    const dist = [0,0,0,0];
+    Object.values(answers).forEach(a => { if (a.choice >= 0 && a.choice <= 3) dist[a.choice]++; });
+    dist.forEach((n, i) => {
+      const el = document.getElementById('cnt-' + i);
+      const bar = document.getElementById('bar-' + i);
+      if (el) el.textContent = n + ' réponse' + (n>1?'s':'');
+      if (bar) bar.style.width = (count > 0 ? Math.round(n/count*100) : 0) + '%';
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// LAUNCH QUESTION
+// ═══════════════════════════════════════════════════════════
+async function launchQuestion(qi) {
+  const q = QUESTIONS[qi];
+  if (!q) return;
+  currentQIndex = qi;
+  currentTimerDuration = q.timer;
+  currentTimerEnd = Date.now() + q.timer * 1000;
+
+  // Reset answer count UI
+  document.getElementById('h-answer-count').textContent = '0 / ' + totalPlayers;
+  document.getElementById('h-progress-bar').style.width = '0%';
+  document.getElementById('h-distrib-section').style.display = 'none';
+
+  // Write to Firebase
+  await db.ref('game').set({
+    status: 'question',
+    currentQuestion: qi,
+    timerEnd: currentTimerEnd,
+    timerDuration: q.timer
+  });
+
+  renderHostQuestion(q, false);
+  listenToAnswers(qi);
+  updateTimerRing(q.timer, q.timer);
+  startHostTimer(q.timer);
+
+  // Buttons
+  setCtrlButtons('question');
+  document.getElementById('tb-status').textContent = '🟢 Question ' + (qi+1);
+}
+
+// ═══════════════════════════════════════════════════════════
+// REPLAY
+// ═══════════════════════════════════════════════════════════
+async function replayQuestion() {
+  if (currentQIndex < 0) return;
+  const q = QUESTIONS[currentQIndex];
+  currentTimerEnd = Date.now() + q.timer * 1000;
+  currentTimerDuration = q.timer;
+
+  await db.ref('game').update({
+    timerEnd: currentTimerEnd,
+    timerDuration: q.timer
+  });
+
+  startHostTimer(q.timer);
+  updateTimerRing(q.timer, q.timer);
+
+  if (q.type === 'youtube') {
+    ytLoadAndPlay(q.youtubeId);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// REVEAL ANSWER + SCORE CALCULATION
+// ═══════════════════════════════════════════════════════════
+async function revealAnswer() {
+  if (currentQIndex < 0) return;
+  stopHostTimer();
+  ytStop();
+
+  const q = QUESTIONS[currentQIndex];
+  const qi = currentQIndex;
+
+  // Read answers & players in parallel
+  const [answersSnap, playersSnap] = await Promise.all([
+    db.ref('answers/' + qi).once('value'),
+    db.ref('players').once('value')
+  ]);
+
+  const answers = answersSnap.val() || {};
+  const players = playersSnap.val() || {};
+
+  // Compute score updates
+  const updates = {};
+  let correctCount = 0;
+
+  Object.entries(answers).forEach(([pid, data]) => {
+    if (data.choice === q.correctIndex && players[pid]) {
+      const newScore = (players[pid].score || 0) + 1;
+      updates['players/' + pid + '/score'] = newScore;
+      correctCount++;
+    }
+  });
+
+  // Update game status
+  updates['game/status'] = 'reveal';
+  updates['game/correctAnswer'] = q.correctIndex;
+
+  await db.ref().update(updates);
+
+  // Update host UI
+  renderHostQuestion(q, true);
+  listenToAnswers(qi);
+  updateTimerRing(0, q.timer);
+
+  // Show distribution summary
+  const total = Object.keys(answers).length;
+  document.getElementById('h-distrib-section').style.display = 'block';
+  const dist = [0,0,0,0];
+  Object.values(answers).forEach(a => { if (a.choice>=0&&a.choice<=3) dist[a.choice]++; });
+  document.getElementById('h-distrib-detail').innerHTML =
+    dist.map((n,i) => {
+      const isCorrect = i === q.correctIndex;
+      const pct = total > 0 ? Math.round(n/total*100) : 0;
+      return `<span style="color:${isCorrect?'#CCFF00':'#888'}">${String.fromCharCode(65+i)}. ${escHtml(q.choices[i])}</span> — <strong style="color:#fff">${n}</strong> réponse${n!==1?'s':''} (${pct}%)${isCorrect?' ✓':''}<br>`;
+    }).join('') + `<br><span style="color:#777">Bonnes réponses : ${correctCount} / ${total}</span>`;
+
+  setCtrlButtons('reveal');
+  document.getElementById('tb-status').textContent = '👁 Révélé Q' + (qi+1);
+}
+
+// ═══════════════════════════════════════════════════════════
+// GO TO NEXT
+// ═══════════════════════════════════════════════════════════
+async function goToNext() {
+  const nextIdx = currentQIndex + 1;
+
+  if (SCOREBOARD_AFTER.has(currentQIndex)) {
+    const checkpoint = currentQIndex + 1; // 9, 18 ou 27
+    currentScoreboardCheckpoint = checkpoint;
+    await db.ref('game').update({
+      status: 'scoreboard',
+      scoreboardCheckpoint: checkpoint
+    });
+    await loadAndShowScoreboard(checkpoint);
+    setCtrlButtons('scoreboard');
+  } else if (nextIdx >= QUESTIONS.length) {
+    await db.ref('game').update({ status: 'gameover' });
+    setCtrlButtons('gameover');
+  } else {
+    await launchQuestion(nextIdx);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// SCOREBOARD
+// ═══════════════════════════════════════════════════════════
+async function loadAndShowScoreboard(checkpoint) {
+  showHostScreen('sb-left');
+  const isFinal = checkpoint === 27;
+
+  document.getElementById('sb-host-title').textContent =
+    isFinal ? '🏆 CLASSEMENT FINAL' : '📊 CLASSEMENT — Après Q' + checkpoint;
+  document.getElementById('sb-host-sub').textContent =
+    isFinal ? 'Résultats définitifs !' : 'Tableau intermédiaire';
+
+  const snap = await db.ref('players').once('value');
+  const players = snap.val() || {};
+  const sorted = Object.entries(players)
+    .sort(([,a],[,b]) => (b.score||0) - (a.score||0));
+
+  const list = document.getElementById('sb-host-list');
+  list.innerHTML = '';
+  const medals = ['🥇','🥈','🥉'];
+
+  sorted.forEach(([pid, pl], idx) => {
+    const rank = idx + 1;
+    const div = document.createElement('div');
+    div.className = 'sb-entry-host' + (rank<=3?' r'+rank:'');
+    div.innerHTML =
+      `<div class="sb-rank-h">${rank<=3?medals[rank-1]:rank+'.'}</div>` +
+      `<div class="sb-name-h">${escHtml(pl.name||'???')}</div>` +
+      `<div class="sb-score-h">${pl.score||0} pt${(pl.score||0)!==1?'s':''}</div>`;
+    list.appendChild(div);
+  });
+
+  document.getElementById('tb-q').textContent = 'Scores';
+  document.getElementById('tb-status').textContent = '📊 Tableau';
+}
+
+// ═══════════════════════════════════════════════════════════
+// CONTINUE AFTER SCOREBOARD
+// ═══════════════════════════════════════════════════════════
+async function continueAfterScoreboard() {
+  if (currentScoreboardCheckpoint >= QUESTIONS.length) {
+    await db.ref('game').update({ status: 'gameover' });
+    document.getElementById('tb-status').textContent = '🏆 Fin du jeu';
+    setCtrlButtons('gameover');
+  } else {
+    await launchQuestion(currentScoreboardCheckpoint);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// START GAME
+// ═══════════════════════════════════════════════════════════
+async function startGame() {
+  await launchQuestion(0);
+}
+
+// ═══════════════════════════════════════════════════════════
+// RESET GAME (remet tout à zéro)
+// ═══════════════════════════════════════════════════════════
+async function resetGame() {
+  stopHostTimer();
+  ytStop();
+  currentQIndex = -1;
+
+  // Reset all player scores
+  const snap = await db.ref('players').once('value');
+  const players = snap.val() || {};
+  const updates = {};
+  Object.keys(players).forEach(pid => { updates['players/' + pid + '/score'] = 0; });
+  updates['game'] = { status: 'lobby' };
+  updates['answers'] = null;
+
+  await db.ref().update(updates);
+
+  document.getElementById('tb-q').textContent = '—';
+  document.getElementById('tb-status').textContent = '⬤ Lobby';
+  showHostScreen('lobby-msg');
+  setCtrlButtons('lobby');
+}
+
+// ═══════════════════════════════════════════════════════════
+// CONTROL BUTTON STATES
+// ═══════════════════════════════════════════════════════════
+function setCtrlButtons(state) {
+  const btns = {
+    'btn-start':    ['lobby'],
+    'btn-replay':   ['question'],
+    'btn-reveal':   ['question'],
+    'btn-next':     ['reveal'],
+    'btn-continue': ['scoreboard']
+  };
+
+  Object.entries(btns).forEach(([id, states]) => {
+    const btn = document.getElementById(id);
+    const visible = states.includes(state);
+    btn.style.display = visible ? 'flex' : 'none';
+    btn.disabled = false;
+  });
+
+  // "Rejouer" and "Révéler" are active during question
+  if (state === 'question') {
+    document.getElementById('btn-replay').disabled = false;
+    document.getElementById('btn-reveal').disabled = false;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ═══════════════════════════════════════════════════════════
+// FIREBASE LISTENERS
+// ═══════════════════════════════════════════════════════════
+
+// Player list + count
+db.ref('players').on('value', snap => {
+  const players = snap.val() || {};
+  const list = Object.entries(players)
+    .sort(([,a],[,b]) => (b.score||0) - (a.score||0));
+
+  totalPlayers = list.length;
+  document.getElementById('tb-players').textContent = totalPlayers;
+  document.getElementById('lobby-player-count').textContent =
+    totalPlayers + ' joueur' + (totalPlayers>1?'s':'') + ' connecté' + (totalPlayers>1?'s':'');
+
+  const pl = document.getElementById('playerList');
+  pl.innerHTML = '';
+  list.forEach(([, p]) => {
+    const div = document.createElement('div');
+    div.className = 'player-item';
+    div.innerHTML =
+      '<span>' + escHtml(p.name||'???') + '</span>' +
+      '<span class="player-score-badge">' + (p.score||0) + 'pt</span>';
+    pl.appendChild(div);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  initQRCode();
+  showHostScreen('lobby-msg');
+  setCtrlButtons('lobby');
+
+  // Sync host to current game state (in case of page refresh)
+  db.ref('game').once('value').then(snap => {
+    const g = snap.val();
+    if (!g || g.status === 'lobby') return;
+
+    currentQIndex = g.currentQuestion || 0;
+    currentScoreboardCheckpoint = g.scoreboardCheckpoint || 0;
+
+    if (g.status === 'question') {
+      currentTimerEnd = g.timerEnd || Date.now();
+      const q = QUESTIONS[currentQIndex];
+      if (q) {
+        renderHostQuestion(q, false);
+        listenToAnswers(currentQIndex);
+        const left = Math.max(0, (currentTimerEnd - Date.now()) / 1000);
+        updateTimerRing(left, q.timer);
+        if (left > 0) startHostTimer(q.timer);
+        setCtrlButtons('question');
+      }
+    } else if (g.status === 'reveal') {
+      const q = QUESTIONS[currentQIndex];
+      if (q) {
+        renderHostQuestion(q, true);
+        listenToAnswers(currentQIndex);
+        updateTimerRing(0, q.timer);
+        setCtrlButtons('reveal');
+      }
+    } else if (g.status === 'scoreboard') {
+      loadAndShowScoreboard(g.scoreboardCheckpoint || 9);
+      setCtrlButtons('scoreboard');
+    }
+  });
+});
+</script>
+</body>
+</html>

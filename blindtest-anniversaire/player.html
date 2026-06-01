@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Blind Test Gaming</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --neon: #CCFF00;
+      --bg: #1a1a1a;
+      --card: #111;
+      --radius: 14px;
+    }
+
+    body {
+      background: var(--bg);
+      color: #fff;
+      font-family: 'Impact', 'Arial Black', Arial, sans-serif;
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow-x: hidden;
+    }
+
+    /* ── SCREENS ───────────────────────────────── */
+    .screen { display: none; }
+    .screen.active { display: flex; flex-direction: column; }
+
+    /* ── LOBBY ─────────────────────────────────── */
+    #screen-lobby {
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 24px;
+      gap: 28px;
+      text-align: center;
+    }
+
+    .lobby-title {
+      font-size: clamp(2rem, 9vw, 3.2rem);
+      text-transform: uppercase;
+      color: var(--neon);
+      text-shadow: 0 0 20px var(--neon), 0 0 40px rgba(204,255,0,.4);
+      letter-spacing: 5px;
+      line-height: 1.1;
+    }
+
+    .lobby-name {
+      font-size: clamp(1.3rem, 5vw, 1.8rem);
+      color: #fff;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .lobby-name span {
+      color: var(--neon);
+      text-shadow: 0 0 12px var(--neon);
+    }
+
+    .lobby-status {
+      font-family: Arial, sans-serif;
+      font-size: 0.9rem;
+      color: #666;
+      letter-spacing: 1px;
+    }
+
+    .lobby-dots { display: flex; gap: 10px; justify-content: center; }
+    .lobby-dots span {
+      width: 10px; height: 10px;
+      background: var(--neon);
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: pulse 1.4s ease-in-out infinite;
+      box-shadow: 0 0 8px var(--neon);
+    }
+    .lobby-dots span:nth-child(2) { animation-delay: .2s; }
+    .lobby-dots span:nth-child(3) { animation-delay: .4s; }
+
+    @keyframes pulse {
+      0%,100% { opacity: 0.2; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    .lobby-count {
+      font-family: Arial, sans-serif;
+      font-size: 0.8rem;
+      color: #555;
+    }
+
+    /* ── QUESTION ──────────────────────────────── */
+    #screen-question {
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 12px 14px 20px;
+      gap: 10px;
+    }
+
+    .q-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .theme-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-family: 'Impact', 'Arial Black', Arial, sans-serif;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .q-number {
+      font-family: Arial, sans-serif;
+      font-size: 0.75rem;
+      color: #555;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+
+    .q-text {
+      font-size: clamp(1rem, 4vw, 1.2rem);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-align: center;
+      line-height: 1.3;
+      color: #eee;
+      padding: 0 4px;
+    }
+
+    /* Pokemon card */
+    .pokemon-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pokemon-wrap img {
+      max-height: 200px;
+      max-width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 0 24px rgba(255,204,0,0.3);
+      object-fit: contain;
+    }
+
+    .pokemon-name {
+      font-family: Arial, sans-serif;
+      font-size: 0.72rem;
+      color: #888;
+      text-align: center;
+    }
+
+    .pokemon-error {
+      font-family: Arial, sans-serif;
+      font-size: 0.8rem;
+      color: #555;
+      text-align: center;
+      padding: 16px;
+      border: 1px dashed #333;
+      border-radius: 8px;
+    }
+
+    /* Music indicator */
+    .music-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+    }
+
+    .music-notes {
+      display: flex;
+      gap: 10px;
+      font-size: 1.8rem;
+    }
+
+    .music-notes span {
+      animation: float 1.2s ease-in-out infinite;
+      display: inline-block;
+      color: var(--neon);
+      text-shadow: 0 0 10px var(--neon);
+    }
+    .music-notes span:nth-child(2) { animation-delay: .3s; font-size: 2.2rem; }
+    .music-notes span:nth-child(3) { animation-delay: .6s; }
+
+    @keyframes float {
+      0%,100% { transform: translateY(0); opacity: .7; }
+      50% { transform: translateY(-8px); opacity: 1; }
+    }
+
+    .music-label {
+      font-family: Arial, sans-serif;
+      font-size: 0.8rem;
+      color: #777;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* Timer ring */
+    .timer-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .timer-svg {
+      width: 110px;
+      height: 110px;
+      filter: drop-shadow(0 0 8px rgba(204,255,0,0.4));
+    }
+
+    #timer-ring {
+      transition: stroke-dashoffset 0.15s linear, stroke 0.4s ease;
+    }
+
+    /* Answer buttons */
+    .answers-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .ans-btn {
+      background: #111;
+      border: 2px solid #2e2e2e;
+      border-radius: var(--radius);
+      color: #ddd;
+      font-size: clamp(0.85rem, 3.5vw, 1.05rem);
+      font-family: 'Impact', 'Arial Black', Arial, sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 18px 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+      line-height: 1.2;
+      min-height: 72px;
+      word-break: break-word;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .ans-btn:active:not(:disabled) { transform: scale(0.95); }
+
+    .ans-btn:hover:not(:disabled) {
+      border-color: var(--neon);
+      color: var(--neon);
+      box-shadow: 0 0 16px rgba(204,255,0,0.2);
+    }
+
+    .ans-btn.selected {
+      border-color: #aaa;
+      color: #aaa;
+      background: #1e1e1e;
+    }
+
+    .ans-btn.correct {
+      border-color: var(--neon) !important;
+      background: rgba(204,255,0,0.12) !important;
+      color: var(--neon) !important;
+      box-shadow: 0 0 24px rgba(204,255,0,0.5) !important;
+    }
+
+    .ans-btn.wrong {
+      border-color: #ff4444 !important;
+      background: rgba(255,68,68,0.12) !important;
+      color: #ff4444 !important;
+    }
+
+    .ans-btn.dimmed {
+      border-color: #222;
+      color: #444;
+      background: #111;
+    }
+
+    .ans-btn:disabled { cursor: not-allowed; }
+
+    /* Result banner */
+    .result-banner {
+      text-align: center;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-family: Arial, sans-serif;
+      letter-spacing: 1px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .result-banner.correct-res {
+      background: rgba(204,255,0,0.1);
+      color: var(--neon);
+      border: 1px solid rgba(204,255,0,0.3);
+      text-shadow: 0 0 8px var(--neon);
+    }
+
+    .result-banner.wrong-res {
+      background: rgba(255,68,68,0.1);
+      color: #ff6666;
+      border: 1px solid rgba(255,68,68,0.3);
+    }
+
+    .result-banner.neutral-res {
+      background: rgba(255,255,255,0.05);
+      color: #888;
+      border: 1px solid #222;
+    }
+
+    /* Score pill */
+    .score-pill {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      font-size: 0.8rem;
+      color: #555;
+      letter-spacing: 1px;
+    }
+
+    .score-pill strong {
+      color: var(--neon);
+      font-size: 1rem;
+      text-shadow: 0 0 8px var(--neon);
+    }
+
+    /* ── SCOREBOARD ─────────────────────────────── */
+    #screen-scoreboard {
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 24px 16px;
+      gap: 16px;
+      overflow-y: auto;
+    }
+
+    .sb-title {
+      text-align: center;
+      font-size: clamp(1.6rem, 7vw, 2.4rem);
+      text-transform: uppercase;
+      color: var(--neon);
+      text-shadow: 0 0 20px var(--neon);
+      letter-spacing: 4px;
+    }
+
+    .sb-subtitle {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      font-size: 0.8rem;
+      color: #555;
+      letter-spacing: 1px;
+    }
+
+    .sb-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .sb-entry {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 10px;
+      padding: 12px 16px;
+      transition: all 0.2s;
+    }
+
+    .sb-entry.mine {
+      border-color: var(--neon);
+      box-shadow: 0 0 16px rgba(204,255,0,0.2);
+      background: rgba(204,255,0,0.05);
+    }
+
+    .sb-rank {
+      font-size: 1.2rem;
+      color: #555;
+      min-width: 28px;
+      text-align: center;
+    }
+
+    .sb-entry.rank-1 .sb-rank { color: #FFD700; text-shadow: 0 0 8px #FFD700; font-size: 1.4rem; }
+    .sb-entry.rank-2 .sb-rank { color: #C0C0C0; font-size: 1.3rem; }
+    .sb-entry.rank-3 .sb-rank { color: #CD7F32; font-size: 1.2rem; }
+
+    .sb-name {
+      flex: 1;
+      font-size: 1rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #ccc;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .sb-entry.mine .sb-name { color: var(--neon); }
+
+    .sb-score {
+      font-family: Arial, sans-serif;
+      font-size: 0.9rem;
+      color: #777;
+      white-space: nowrap;
+    }
+
+    .sb-entry.mine .sb-score { color: var(--neon); font-weight: bold; }
+
+    .my-rank-banner {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      font-size: 1rem;
+      color: #888;
+      padding: 12px;
+      border: 1px solid #2a2a2a;
+      border-radius: 10px;
+      background: #111;
+    }
+
+    .my-rank-banner strong {
+      color: var(--neon);
+      font-size: 1.3rem;
+      text-shadow: 0 0 8px var(--neon);
+    }
+
+    .sb-continue-note {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      font-size: 0.75rem;
+      color: #444;
+    }
+
+    /* ── GAME OVER ──────────────────────────────── */
+    #screen-gameover {
+      min-height: 100vh;
+      min-height: 100dvh;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      gap: 20px;
+    }
+
+    .gameover-trophy { font-size: 4rem; filter: drop-shadow(0 0 16px #FFD700); }
+
+    .gameover-title {
+      font-size: clamp(1.8rem, 8vw, 2.8rem);
+      text-transform: uppercase;
+      color: var(--neon);
+      text-shadow: 0 0 24px var(--neon);
+      letter-spacing: 4px;
+    }
+
+    .gameover-score {
+      font-family: Arial, sans-serif;
+      font-size: 1.1rem;
+      color: #888;
+    }
+
+    .gameover-score strong {
+      color: var(--neon);
+      font-size: 1.6rem;
+      text-shadow: 0 0 10px var(--neon);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOBBY -->
+  <div id="screen-lobby" class="screen active">
+    <span style="font-size:3rem;text-align:center;padding-top:60px;filter:drop-shadow(0 0 16px #CCFF00)">🎮</span>
+    <div class="lobby-title">BLIND TEST</div>
+    <div class="lobby-name">Bienvenue, <span id="lobbyName">???</span></div>
+    <div class="lobby-status">En attente de l'animateur...</div>
+    <div class="lobby-dots">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="lobby-count" id="lobbyCount">0 joueur(s) connecté(s)</div>
+  </div>
+
+  <!-- QUESTION / REVEAL (same screen) -->
+  <div id="screen-question" class="screen">
+    <div class="q-header">
+      <div class="theme-badge" id="themeBadge">POKÉMON</div>
+      <div class="q-number" id="qNumber">Q1 / 27</div>
+    </div>
+
+    <div class="q-text" id="qText">Question...</div>
+
+    <!-- Pokemon card -->
+    <div class="pokemon-wrap" id="pokemonWrap" style="display:none">
+      <img id="pokemonImg" src="" alt="Carte Pokémon"
+           onerror="this.style.display='none';document.getElementById('pokemonErr').style.display='block'">
+      <div id="pokemonErr" class="pokemon-error" style="display:none">Image non disponible</div>
+      <div class="pokemon-name" id="pokemonName"></div>
+    </div>
+
+    <!-- Music indicator -->
+    <div class="music-wrap" id="musicWrap" style="display:none">
+      <div class="music-notes">
+        <span>♪</span><span>♫</span><span>♪</span>
+      </div>
+      <div class="music-label">Écoutez la musique !</div>
+    </div>
+
+    <!-- Timer ring -->
+    <div class="timer-wrap">
+      <svg viewBox="0 0 120 120" class="timer-svg">
+        <circle cx="60" cy="60" r="50" fill="none" stroke="#252525" stroke-width="9"/>
+        <circle cx="60" cy="60" r="50" fill="none" stroke="#CCFF00" stroke-width="9"
+          stroke-dasharray="314.16" stroke-dashoffset="0"
+          stroke-linecap="round" transform="rotate(-90 60 60)"
+          id="timer-ring"/>
+        <text x="60" y="66" text-anchor="middle" font-size="30" font-weight="bold"
+          fill="#CCFF00" font-family="Impact, Arial Black, sans-serif"
+          id="timer-text">30</text>
+      </svg>
+    </div>
+
+    <!-- Answer buttons -->
+    <div class="answers-grid" id="answersGrid">
+      <button class="ans-btn" id="btn0" onclick="submitAnswer(0)"></button>
+      <button class="ans-btn" id="btn1" onclick="submitAnswer(1)"></button>
+      <button class="ans-btn" id="btn2" onclick="submitAnswer(2)"></button>
+      <button class="ans-btn" id="btn3" onclick="submitAnswer(3)"></button>
+    </div>
+
+    <!-- Result banner (shown after reveal) -->
+    <div class="result-banner neutral-res" id="resultBanner" style="display:none"></div>
+
+    <!-- Current score -->
+    <div class="score-pill" id="scorePill">Score : <strong>0</strong></div>
+  </div>
+
+  <!-- SCOREBOARD -->
+  <div id="screen-scoreboard" class="screen">
+    <div class="sb-title" id="sbTitle">CLASSEMENT</div>
+    <div class="sb-subtitle" id="sbSubtitle">Tableau des scores</div>
+    <div class="sb-list" id="sbList"></div>
+    <div class="my-rank-banner" id="myRankBanner"></div>
+    <div class="sb-continue-note">En attente de l'animateur pour continuer...</div>
+  </div>
+
+  <!-- GAME OVER -->
+  <div id="screen-gameover" class="screen">
+    <div class="gameover-trophy">🏆</div>
+    <div class="gameover-title">FIN DU JEU !</div>
+    <div class="gameover-score" id="gameoverScore">Ton score final : <strong>0</strong></div>
+    <div style="font-family:Arial,sans-serif;font-size:0.8rem;color:#555">Merci d'avoir participé !</div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+  <script>
+  // ═══════════════════════════════════════════
+  // QUESTIONS (27 au total)
+  // Pour les questions YouTube : remplacer les youtubeId
+  // Format URL : https://www.youtube.com/watch?v=VOTRE_ID
+  // ═══════════════════════════════════════════
+  const QUESTIONS = [
+    // ── POKÉMON ─ 6 questions ─ 45s ──
+    { id:0, theme:'POKÉMON', themeIcon:'🃏', themeColor:'#FFCC00', themeText:'#111',
+      type:'pokemon', question:'Combien vaut cette carte en moyenne sur le marché ?',
+      cardImageUrl:'https://images.pokemontcg.io/base1/4_hires.png',
+      cardDisplayName:'Dracaufeu Holo Rare — Set de Base',
+      choices:['50–100€','150–250€','350–500€','1 000–2 000€'], correctIndex:2, timer:45 },
+
+    { id:1, theme:'POKÉMON', themeIcon:'🃏', themeColor:'#FFCC00', themeText:'#111',
+      type:'pokemon', question:'Combien vaut cette carte en moyenne sur le marché ?',
+      cardImageUrl:'https://images.pokemontcg.io/swsh12pt5/215_hires.png',
+      cardDisplayName:'Noctali VMAX — Zénith Suprême (Alt Art)',
+      choices:['30–60€','80–150€','200–300€','500–800€'], correctIndex:2, timer:45 },
+
+    { id:2, theme:'POKÉMON', themeIcon:'🃏', themeColor:'#FFCC00', themeText:'#111',
+      type:'pokemon', question:'Combien vaut cette carte en moyenne sur le marché ?',
+      cardImageUrl:'https://images.pokemontcg.io/swsh7/218_hires.png',
+      cardDisplayName:'Rayquaza VMAX — Ciel Rugissant (Alt Art)',
+      choices:['30–60€','100–180€','250–350€','500–700€'], correctIndex:1, timer:45 },
+
+    { id:3, theme:'POKÉMON', themeIcon:'🃏', themeColor:'#FFCC00', themeText:'#111',
+      type:'pokemon', question:'Combien vaut cette carte en moyenne sur le marché ?',
+      cardImageUrl:'https://images.pokemontcg.io/swsh12/186_hires.png',
+      cardDisplayName:'Lugia V — Tempête Argentée (Alt Art)',
+      choices:['10–25€','40–80€','100–180€','300–500€'], correctIndex:2, timer:45 },
+
+    { id:4, theme:'POKÉMON', themeIcon:'🃏', themeColor:'#FFCC00', themeText:'#111',
+      type:'pokemon', question:'Combien vaut cette carte en moyenne sur le marché ?',
+      cardImageUrl:'https://images.pokemontcg.io/base1/2_hires.png',
+      cardDisplayName:'Tortank Holo Rare — Set de Base',
+      choices:['20–40€','70–130€','200–300€','500–700€'], correctIndex:1, timer:45 },
+
+    { id:5, theme:'POKÉMON', themeIcon:'🃏', themeColor:'#FFCC00', themeText:'#111',
+      type:'pokemon', question:'Combien vaut cette carte en moyenne sur le marché ?',
+      cardImageUrl:'https://images.pokemontcg.io/sv3pt5/207_hires.png',
+      cardDisplayName:'Dracaufeu ex — Pokémon 151 (Alt Art)',
+      choices:['10–25€','40–80€','150–250€','400–600€'], correctIndex:1, timer:45 },
+
+    // ── VALORANT ─ 3 questions ─ 30s ──
+    { id:6, theme:'VALORANT', themeIcon:'⚔️', themeColor:'#FF4655', themeText:'#fff',
+      type:'youtube', question:'Quel agent VALORANT est associé à ce thème musical ?',
+      youtubeId:'REMPLACER_VAL1',
+      choices:['Jett','Phoenix','Reyna','Neon'], correctIndex:1, timer:30 },
+
+    { id:7, theme:'VALORANT', themeIcon:'⚔️', themeColor:'#FF4655', themeText:'#fff',
+      type:'youtube', question:'Quel agent VALORANT possède ce trailer musical ?',
+      youtubeId:'REMPLACER_VAL2',
+      choices:['Chamber','Killjoy','Sage','Cypher'], correctIndex:1, timer:30 },
+
+    { id:8, theme:'VALORANT', themeIcon:'⚔️', themeColor:'#FF4655', themeText:'#fff',
+      type:'youtube', question:'De quelle map VALORANT provient ce thème d\'ambiance ?',
+      youtubeId:'REMPLACER_VAL3',
+      choices:['Ascent','Haven','Bind','Pearl'], correctIndex:0, timer:30 },
+
+    // ── APEX LEGENDS ─ 3 questions ─ 30s ──
+    { id:9, theme:'APEX LEGENDS', themeIcon:'🎯', themeColor:'#CF0A0A', themeText:'#fff',
+      type:'youtube', question:'Quel est le thème de cette légende Apex ?',
+      youtubeId:'REMPLACER_APEX1',
+      choices:['Wraith','Pathfinder','Octane','Bloodhound'], correctIndex:0, timer:30 },
+
+    { id:10, theme:'APEX LEGENDS', themeIcon:'🎯', themeColor:'#CF0A0A', themeText:'#fff',
+      type:'youtube', question:'De quelle saison d\'Apex Legends vient ce thème ?',
+      youtubeId:'REMPLACER_APEX2',
+      choices:['Saison 1','Saison 5','Saison 10','Saison 15'], correctIndex:2, timer:30 },
+
+    { id:11, theme:'APEX LEGENDS', themeIcon:'🎯', themeColor:'#CF0A0A', themeText:'#fff',
+      type:'youtube', question:'Quel est le thème de cette légende Apex ?',
+      youtubeId:'REMPLACER_APEX3',
+      choices:['Loba','Valkyrie','Horizon','Newcastle'], correctIndex:2, timer:30 },
+
+    // ── LEAGUE OF LEGENDS ─ 3 questions ─ 30s ──
+    { id:12, theme:'LEAGUE OF LEGENDS', themeIcon:'⚡', themeColor:'#0BBCD4', themeText:'#fff',
+      type:'youtube', question:'Quel champion League of Legends possède ce thème ?',
+      youtubeId:'REMPLACER_LOL1',
+      choices:['Jinx','Ahri','Yasuo','Vi'], correctIndex:0, timer:30 },
+
+    { id:13, theme:'LEAGUE OF LEGENDS', themeIcon:'⚡', themeColor:'#0BBCD4', themeText:'#fff',
+      type:'youtube', question:'Quel est ce titre musical des Worlds ?',
+      youtubeId:'REMPLACER_LOL2',
+      choices:['Warriors (2014)','Rise (2018)','Phoenix (2019)','GODS (2023)'], correctIndex:0, timer:30 },
+
+    { id:14, theme:'LEAGUE OF LEGENDS', themeIcon:'⚡', themeColor:'#0BBCD4', themeText:'#fff',
+      type:'youtube', question:'Quel champion League of Legends possède ce thème ?',
+      youtubeId:'REMPLACER_LOL3',
+      choices:['Lux','Ekko','Akali','Senna'], correctIndex:2, timer:30 },
+
+    // ── BRAWLHALLA ─ 3 questions ─ 30s ──
+    { id:15, theme:'BRAWLHALLA', themeIcon:'🪓', themeColor:'#3B82F6', themeText:'#fff',
+      type:'youtube', question:'Quel est le thème de cette légende Brawlhalla ?',
+      youtubeId:'REMPLACER_BH1',
+      choices:['Bodvar','Mordex','Val','Koji'], correctIndex:0, timer:30 },
+
+    { id:16, theme:'BRAWLHALLA', themeIcon:'🪓', themeColor:'#3B82F6', themeText:'#fff',
+      type:'youtube', question:'Quel est le thème de cette légende Brawlhalla ?',
+      youtubeId:'REMPLACER_BH2',
+      choices:['Rayman','Cassidy','Isaiah','Artemis'], correctIndex:0, timer:30 },
+
+    { id:17, theme:'BRAWLHALLA', themeIcon:'🪓', themeColor:'#3B82F6', themeText:'#fff',
+      type:'youtube', question:'De quel mode de jeu Brawlhalla vient cette musique ?',
+      youtubeId:'REMPLACER_BH3',
+      choices:['Brawlball','Kung Foot','Bombsketball','Horde'], correctIndex:1, timer:30 },
+
+    // ── CLASH OF CLANS ─ 3 questions ─ 30s ──
+    { id:18, theme:'CLASH OF CLANS', themeIcon:'🏰', themeColor:'#F59E0B', themeText:'#111',
+      type:'youtube', question:'Quel est ce thème musical de Clash of Clans ?',
+      youtubeId:'REMPLACER_COC1',
+      choices:['Thème principal','Village du Constructeur','Capital de Clan','Mode Guerre'], correctIndex:0, timer:30 },
+
+    { id:19, theme:'CLASH OF CLANS', themeIcon:'🏰', themeColor:'#F59E0B', themeText:'#111',
+      type:'youtube', question:'Quel Héros CoC est associé à ce thème ?',
+      youtubeId:'REMPLACER_COC2',
+      choices:['Roi Barbare','Reine Archer','Grand Gardien','Maître des Forges'], correctIndex:1, timer:30 },
+
+    { id:20, theme:'CLASH OF CLANS', themeIcon:'🏰', themeColor:'#F59E0B', themeText:'#111',
+      type:'youtube', question:'De quel village CoC provient cette musique d\'ambiance ?',
+      youtubeId:'REMPLACER_COC3',
+      choices:['Village Principal','Village Constructeur','Capital de Clan','Village de Nuit'], correctIndex:1, timer:30 },
+
+    // ── CLASH ROYALE ─ 3 questions ─ 30s ──
+    { id:21, theme:'CLASH ROYALE', themeIcon:'👑', themeColor:'#7C3AED', themeText:'#fff',
+      type:'youtube', question:'Quel est ce thème musical de Clash Royale ?',
+      youtubeId:'REMPLACER_CR1',
+      choices:['Menu principal','Arène Légendaire','Village d\'Entraînement','Tournoi'], correctIndex:0, timer:30 },
+
+    { id:22, theme:'CLASH ROYALE', themeIcon:'👑', themeColor:'#7C3AED', themeText:'#fff',
+      type:'youtube', question:'De quelle arène Clash Royale provient cette musique ?',
+      youtubeId:'REMPLACER_CR2',
+      choices:['Arène 1 — Gobelins','Arène 5 — Jungle','Arène 10 — Forteresse','Arène Légendaire'], correctIndex:3, timer:30 },
+
+    { id:23, theme:'CLASH ROYALE', themeIcon:'👑', themeColor:'#7C3AED', themeText:'#fff',
+      type:'youtube', question:'Quel mode de jeu Clash Royale correspond à ce thème ?',
+      youtubeId:'REMPLACER_CR3',
+      choices:['2v2','Mode Draft','Défi Classique','Global Tournament'], correctIndex:0, timer:30 },
+
+    // ── BRAWL STARS ─ 3 questions ─ 30s ──
+    { id:24, theme:'BRAWL STARS', themeIcon:'⭐', themeColor:'#EC4899', themeText:'#fff',
+      type:'youtube', question:'Quel Brawler possède ce thème musical ?',
+      youtubeId:'REMPLACER_BS1',
+      choices:['El Primo','Shelly','Spike','Crow'], correctIndex:2, timer:30 },
+
+    { id:25, theme:'BRAWL STARS', themeIcon:'⭐', themeColor:'#EC4899', themeText:'#fff',
+      type:'youtube', question:'Quel mode de jeu Brawl Stars correspond à cette musique ?',
+      youtubeId:'REMPLACER_BS2',
+      choices:['Gem Grab','Brawl Ball','Showdown','Bounty'], correctIndex:1, timer:30 },
+
+    { id:26, theme:'BRAWL STARS', themeIcon:'⭐', themeColor:'#EC4899', themeText:'#fff',
+      type:'youtube', question:'Quel est le thème de ce Brawler légendaire ?',
+      youtubeId:'REMPLACER_BS3',
+      choices:['Leon','Sandy','Amber','Surge'], correctIndex:0, timer:30 }
+  ];
+
+  // ═══════════════════════════════════════════
+  // FIREBASE INIT
+  // ═══════════════════════════════════════════
+  const firebaseConfig = {
+    apiKey: "AIzaSyBDjMGInt3PNL7SNlfFG_-cjahJW66_i1A",
+    authDomain: "blindtest-anniversaire.firebaseapp.com",
+    databaseURL: "https://blindtest-anniversaire-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "blindtest-anniversaire",
+    storageBucket: "blindtest-anniversaire.firebasestorage.app",
+    messagingSenderId: "164642303775",
+    appId: "1:164642303775:web:ba51b309d28675fb8f8a2a"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // ═══════════════════════════════════════════
+  // PLAYER IDENTITY
+  // ═══════════════════════════════════════════
+  const playerId = localStorage.getItem('bt_playerId');
+  const playerName = localStorage.getItem('bt_playerName');
+  if (!playerId || !playerName) { window.location.href = 'index.html'; }
+
+  document.getElementById('lobbyName').textContent = playerName || '???';
+
+  // ═══════════════════════════════════════════
+  // STATE
+  // ═══════════════════════════════════════════
+  const CIRC = 314.16; // 2 * PI * 50
+  let timerInterval = null;
+  let currentTimerEnd = 0;
+  let currentTimerDuration = 30;
+  let currentQIndex = -1;
+  let playerAnswer = -1;
+  let myScore = 0;
+
+  // ═══════════════════════════════════════════
+  // SCREEN HELPERS
+  // ═══════════════════════════════════════════
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  // ═══════════════════════════════════════════
+  // TIMER RING
+  // ═══════════════════════════════════════════
+  function updateTimerRing(left, total) {
+    const frac = Math.max(0, Math.min(1, left / total));
+    const offset = (1 - frac) * CIRC;
+    const ring = document.getElementById('timer-ring');
+    const txt  = document.getElementById('timer-text');
+    ring.style.strokeDashoffset = offset;
+    txt.textContent = Math.ceil(left);
+    const color = frac > 0.5 ? '#CCFF00' : frac > 0.25 ? '#FFD700' : '#FF4444';
+    ring.style.stroke = color;
+    txt.style.fill = color;
+    ring.style.filter = frac <= 0.25 ? 'drop-shadow(0 0 6px #FF4444)' : 'drop-shadow(0 0 6px #CCFF00)';
+  }
+
+  function startLocalTimer(duration) {
+    stopLocalTimer();
+    timerInterval = setInterval(() => {
+      const left = Math.max(0, (currentTimerEnd - Date.now()) / 1000);
+      updateTimerRing(left, duration);
+      if (left <= 0) {
+        stopLocalTimer();
+        lockButtons();
+      }
+    }, 100);
+  }
+
+  function stopLocalTimer() {
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  }
+
+  function lockButtons() {
+    document.querySelectorAll('.ans-btn').forEach(b => { b.disabled = true; });
+  }
+
+  // ═══════════════════════════════════════════
+  // RENDER QUESTION
+  // ═══════════════════════════════════════════
+  function renderQuestion(q, timerEnd, timerDuration) {
+    playerAnswer = -1;
+    currentTimerEnd = timerEnd;
+    currentTimerDuration = timerDuration;
+
+    // Theme badge
+    const badge = document.getElementById('themeBadge');
+    badge.textContent = q.themeIcon + ' ' + q.theme;
+    badge.style.background = q.themeColor;
+    badge.style.color = q.themeText;
+    badge.style.boxShadow = '0 0 12px ' + q.themeColor + '60';
+
+    // Question number + text
+    document.getElementById('qNumber').textContent = 'Q' + (q.id + 1) + ' / 27';
+    document.getElementById('qText').textContent = q.question;
+
+    // Media type
+    if (q.type === 'pokemon') {
+      document.getElementById('pokemonWrap').style.display = 'flex';
+      document.getElementById('musicWrap').style.display = 'none';
+      const img = document.getElementById('pokemonImg');
+      img.style.display = 'block';
+      img.src = q.cardImageUrl;
+      document.getElementById('pokemonErr').style.display = 'none';
+      document.getElementById('pokemonName').textContent = q.cardDisplayName;
+    } else {
+      document.getElementById('pokemonWrap').style.display = 'none';
+      document.getElementById('musicWrap').style.display = 'flex';
+    }
+
+    // Answer buttons
+    const btns = ['btn0','btn1','btn2','btn3'];
+    btns.forEach((id, i) => {
+      const btn = document.getElementById(id);
+      btn.textContent = q.choices[i];
+      btn.className = 'ans-btn';
+      btn.disabled = false;
+    });
+
+    // Hide result banner
+    const banner = document.getElementById('resultBanner');
+    banner.style.display = 'none';
+
+    // Timer
+    updateTimerRing(timerDuration, timerDuration);
+    startLocalTimer(timerDuration);
+
+    showScreen('screen-question');
+  }
+
+  // ═══════════════════════════════════════════
+  // SUBMIT ANSWER
+  // ═══════════════════════════════════════════
+  async function submitAnswer(choice) {
+    if (playerAnswer !== -1) return;
+    playerAnswer = choice;
+    stopLocalTimer();
+
+    document.querySelectorAll('.ans-btn').forEach((btn, i) => {
+      btn.disabled = true;
+      if (i === choice) btn.classList.add('selected');
+    });
+
+    try {
+      await db.ref(`answers/${currentQIndex}/${playerId}`).set({
+        choice,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+      });
+    } catch(e) { console.error('Submit error:', e); }
+  }
+
+  // ═══════════════════════════════════════════
+  // REVEAL ANSWER
+  // ═══════════════════════════════════════════
+  function revealAnswer(correctIdx) {
+    stopLocalTimer();
+    updateTimerRing(0, currentTimerDuration);
+    lockButtons();
+
+    const btns = ['btn0','btn1','btn2','btn3'];
+    btns.forEach((id, i) => {
+      const btn = document.getElementById(id);
+      if (i === correctIdx) {
+        btn.classList.remove('selected','wrong','dimmed');
+        btn.classList.add('correct');
+      } else if (i === playerAnswer) {
+        btn.classList.remove('selected');
+        btn.classList.add('wrong');
+      } else {
+        btn.classList.add('dimmed');
+      }
+    });
+
+    const banner = document.getElementById('resultBanner');
+    banner.style.display = 'flex';
+    if (playerAnswer === -1) {
+      banner.className = 'result-banner neutral-res';
+      banner.textContent = '⏱ Temps écoulé — pas de réponse';
+    } else if (playerAnswer === correctIdx) {
+      banner.className = 'result-banner correct-res';
+      banner.textContent = '✔ BONNE RÉPONSE ! +1 point';
+    } else {
+      banner.className = 'result-banner wrong-res';
+      const correct = QUESTIONS[currentQIndex];
+      banner.textContent = '✘ Mauvaise réponse — C\'était : ' + correct.choices[correctIdx];
+    }
+  }
+
+  // ═══════════════════════════════════════════
+  // SCOREBOARD
+  // ═══════════════════════════════════════════
+  async function showScoreboard(checkpoint) {
+    showScreen('screen-scoreboard');
+
+    const isFinal = (checkpoint === 27);
+    document.getElementById('sbTitle').textContent = isFinal ? '🏆 CLASSEMENT FINAL' : '📊 CLASSEMENT INTERMÉDIAIRE';
+    document.getElementById('sbSubtitle').textContent = isFinal ? 'Résultats définitifs !' : `Après la question ${checkpoint}`;
+
+    const snap = await db.ref('players').once('value');
+    const players = snap.val() || {};
+    const sorted = Object.entries(players)
+      .sort(([,a],[,b]) => (b.score||0) - (a.score||0));
+
+    const list = document.getElementById('sbList');
+    list.innerHTML = '';
+    const medals = ['🥇','🥈','🥉'];
+
+    sorted.forEach(([pid, pl], idx) => {
+      const rank = idx + 1;
+      const div = document.createElement('div');
+      div.className = 'sb-entry' + (pid === playerId ? ' mine' : '') + (rank<=3 ? ` rank-${rank}` : '');
+      const rankStr = rank <= 3 ? medals[rank-1] : rank + '.';
+      div.innerHTML = `
+        <div class="sb-rank">${rankStr}</div>
+        <div class="sb-name">${escHtml(pl.name || '???')}</div>
+        <div class="sb-score">${pl.score||0} pt${(pl.score||0)!==1?'s':''}</div>
+      `;
+      list.appendChild(div);
+    });
+
+    const myIdx = sorted.findIndex(([pid]) => pid === playerId);
+    const myRank = myIdx + 1;
+    const total = sorted.length;
+    const rankLabel = myRank === 1 ? '1er' : myRank === 2 ? '2ème' : myRank + 'ème';
+    document.getElementById('myRankBanner').innerHTML =
+      `Tu es <strong>${rankLabel}</strong> sur ${total} joueur${total>1?'s':''}`;
+  }
+
+  // ═══════════════════════════════════════════
+  // GAME OVER
+  // ═══════════════════════════════════════════
+  function showGameOver() {
+    db.ref('players/' + playerId + '/score').once('value').then(snap => {
+      const s = snap.val() || 0;
+      document.getElementById('gameoverScore').innerHTML =
+        `Ton score final : <strong>${s} pt${s!==1?'s':''}</strong>`;
+    });
+    showScreen('screen-gameover');
+  }
+
+  // ═══════════════════════════════════════════
+  // UTILITIES
+  // ═══════════════════════════════════════════
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ═══════════════════════════════════════════
+  // FIREBASE LISTENERS
+  // ═══════════════════════════════════════════
+
+  // Live player count in lobby
+  db.ref('players').on('value', snap => {
+    const n = snap.numChildren();
+    document.getElementById('lobbyCount').textContent =
+      n + ' joueur' + (n>1?'s':'') + ' connecté' + (n>1?'s':'');
+  });
+
+  // Live score
+  db.ref('players/' + playerId + '/score').on('value', snap => {
+    myScore = snap.val() || 0;
+    document.getElementById('scorePill').innerHTML =
+      'Score : <strong>' + myScore + '</strong>';
+  });
+
+  // Main game state listener
+  db.ref('game').on('value', snap => {
+    const g = snap.val();
+    if (!g) return;
+
+    switch (g.status) {
+      case 'lobby':
+        showScreen('screen-lobby');
+        break;
+
+      case 'question': {
+        const qi = g.currentQuestion;
+        const q  = QUESTIONS[qi];
+        if (!q) return;
+        if (qi !== currentQIndex) {
+          currentQIndex = qi;
+          // Check if already answered
+          db.ref(`answers/${qi}/${playerId}`).once('value').then(ans => {
+            const existing = ans.val();
+            renderQuestion(q, g.timerEnd, g.timerDuration);
+            if (existing !== null) {
+              submitAnswer(existing.choice); // re-apply visual
+            }
+          });
+        } else {
+          // Timer reset (Rejouer)
+          currentTimerEnd = g.timerEnd;
+          startLocalTimer(g.timerDuration);
+        }
+        break;
+      }
+
+      case 'reveal':
+        stopLocalTimer();
+        if (currentQIndex === g.currentQuestion) {
+          revealAnswer(QUESTIONS[g.currentQuestion].correctIndex);
+        }
+        break;
+
+      case 'scoreboard':
+        showScoreboard(g.scoreboardCheckpoint || 9);
+        break;
+
+      case 'gameover':
+        showGameOver();
+        break;
+    }
+  });
+  </script>
+</body>
+</html>
